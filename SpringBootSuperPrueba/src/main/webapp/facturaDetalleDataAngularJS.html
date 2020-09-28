@@ -1,0 +1,246 @@
+
+<html>
+<head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.js"></script>
+
+<title>Spring Boot AngularJS example</title>
+<script type="text/javascript">
+            var app = angular.module("FacturaDetalleManagement", []);
+         
+            //Controller Part
+            app.controller("FacturaDetalleController", function($scope, $http) {
+            	
+                $scope.facturaDetalles = [];
+                $scope.facturaDetalleForm = {
+                    idFacturaDetalle : -1,
+                    idFactura : "",
+               	 	idProducto : "",
+               	 	cantidad : "",
+               	 	valorUnidad : "",
+               	 	valorTotal : ""
+                };
+         
+                //Now load the data from server
+                _refreshFacturaDetalleData();
+         
+                //HTTP POST/PUT methods for add/edit facturaDetalle 
+                // with the help of idFacturaDetalle, we are going to find out whether it is put or post operation
+                
+                $scope.submitFacturaDetalle = function() {
+         
+                    var method = "";
+                    var url = "";
+                    if ($scope.facturaDetalleForm.idFacturaDetalle == -1) {
+                        //Id is absent in form data, it is create new facturaDetalle operation
+                        method = "POST";
+                        url = '/addFacturaDetalle';
+                    } else {
+                        //Id is present in form data, it is edit facturaDetalle operation
+                        method = "PUT";
+                        url = '/addFacturaDetalle';
+                    }
+         
+                    $http({
+                        method : method,
+                        url : url,
+                        data : angular.toJson($scope.facturaDetalleForm),
+                        headers : {
+                            'Content-Type' : 'application/json'
+                        }
+                    }).then( _success, _error );
+                };
+         
+                //HTTP DELETE- delete facturaDetalle by Id
+                $scope.deleteFacturaDetalle = function(facturaDetalle) {
+                    $http({
+                        method : 'DELETE',
+                        url : '/deleteFacturaDetalle/' + facturaDetalle.idFacturaDetalle
+                    }).then(_success, _error);
+                };
+ 
+             // In case of edit, populate form fields and assign form.idFacturaDetalle with facturaDetalle idFacturaDetalle
+                $scope.editFacturaDetalle = function(facturaDetalle) {
+                	 
+                	$scope.facturaDetalleForm.idFactura = facturaDetalle.idFactura;
+                	$scope.facturaDetalleForm.idProducto = facturaDetalle.idProducto;
+                	$scope.facturaDetalleForm.cantidad = facturaDetalle.cantidad;
+                	$scope.facturaDetalleForm.valorUnidad = facturaDetalle.valorUnidad;
+                	$scope.facturaDetalleForm.valorTotal = facturaDetalle.valorTotal;
+                    $scope.facturaDetalleForm.idFacturaDetalle = facturaDetalle.idFacturaDetalle;
+                };
+         
+                /* Private Methods */
+                //HTTP GET- get all facturaDetalles collection
+                function _refreshFacturaDetalleData() {
+                    $http({
+                        method : 'GET',
+                        url : 'http://localhost:9095/getAllFacturaDetalles'
+                    }).then(function successCallback(response) {
+                        $scope.facturaDetalles = response.data;
+                    }, function errorCallback(response) {
+                        console.log(response.statusText);
+                    });
+                }
+         
+                function _success(response) {
+                    _refreshFacturaDetalleData();
+                    _clearFormData()
+                }
+         
+                function _error(response) {
+                    console.log(response.statusText);
+                }
+         
+                //Clear the form
+                function _clearFormData() {
+                	
+                    $scope.facturaDetalleForm.idFacturaDetalle = -1;
+                    $scope.facturaDetalleForm.idFactura = "";
+                    $scope.facturaDetalleForm.idProducto = "";
+                    $scope.facturaDetalleForm.cantidad = "";
+                    $scope.facturaDetalleForm.valorUnidad = "";
+                    $scope.facturaDetalleForm.valorTotal = "";
+                };
+            });
+        </script>
+<style>
+.blue-button {
+	background: #25A6E1;
+	filter: progidFacturaDetalle: DXImageTransform.Microsoft.gradient( startColorstr='#25A6E1',
+		endColorstr='#188BC0', GradientType=0);
+	padding: 3px 5px;
+	color: #fff;
+	font-family: 'Helvetica Neue', sans-serif;
+	font-size: 12px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 4px;
+	border: 1px solid #1A87B9
+}
+
+.red-button {
+	background: #CD5C5C;
+	padding: 3px 5px;
+	color: #fff;
+	font-family: 'Helvetica Neue', sans-serif;
+	font-size: 12px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 4px;
+	border: 1px solid #CD5C5C
+}
+
+idFacturaDetalleble {
+	font-family: "Helvetica Neue", Helvetica, sans-serif;
+	width: 50%;
+}
+
+caption {
+	text-align: left;
+	color: silver;
+	font-weight: bold;
+	text-transform: uppercase;
+	padding: 5px;
+}
+
+th {
+	background: SteelBlue;
+	color: white;
+}
+
+tbody tr:nth-child(even) {
+	background: WhiteSmoke;
+}
+
+tbody tr td:nth-child(2) {
+	text-align: center;
+}
+
+tbody tr td:nth-child(3), tbody tr td:nth-child(4) {
+	text-align: center;
+	font-family: monospace;
+}
+
+tfoot {
+	background: SeaGreen;
+	color: white;
+	text-align: right;
+}
+
+tfoot tr th:last-child {
+	font-family: monospace;
+}
+
+td, th {
+	border: 1px solid gray;
+	width: 25%;
+	text-align: left;
+	padding: 5px 10px;
+}
+</style>
+<head>
+<body ng-app="FacturaDetalleManagement" ng-controller="FacturaDetalleController">
+	<h1>FacturaDetalle </h1>
+	<form ng-submit="submitFacturaDetalle()">
+		<table>
+
+			<tr>
+				<th colspan="2">Add/Edit facturaDetalle</th>
+			</tr>
+
+			<tr>
+				<td>idFactura</td>
+				<td><input type="text" ng-model="facturaDetalleForm.idFactura" /></td>
+			</tr>
+			<tr>
+				<td>idProducto</td>
+				<td><input type="text" ng-model="facturaDetalleForm.idProducto" /></td>
+			</tr>
+			<tr>
+				<td>cantidad</td>
+				<td><input type="text" ng-model="facturaDetalleForm.cantidad" /></td>
+			</tr>
+			<tr>
+				<td>valorUnidad</td>
+				<td><input type="text" ng-model="facturaDetalleForm.valorUnidad" /></td>
+			</tr>
+			<tr>
+				<td>valorTotal</td>
+				<td><input type="text" ng-model="facturaDetalleForm.valorTotal" /></td>
+			</tr>
+			<tr>
+				<td colspan="2"><input type="submit" value="Submit"
+					class="blue-button" /></td>
+			</tr>
+		</table>
+	</form>
+	<table>
+		<tr>
+
+			<th>idFactura</th>
+			<th>idProducto</th>
+			<th>cantidad</th>
+			<th>valorUnidad</th>
+			<th>valorTotal</th>
+			<th>Operations</th>
+
+		</tr>
+
+		<tr ng-repeat="facturaDetalle in facturaDetalles">
+	
+			
+			<td>{{ facturaDetalle.idFactura }}</td>
+			<td>{{ facturaDetalle.idProducto }}</td>
+			<td>{{ facturaDetalle.cantidad }}</td>
+			<td>{{ facturaDetalle.valorUnidad }}</td>
+			<td>{{ facturaDetalle.valorTotal }}</td>
+
+
+			<td><a ng-click="editFacturaDetalle(facturaDetalle)" class="blue-button">Edit</a>
+				|-| <a ng-click="deleteFacturaDetalle(facturaDetalle)" class="red-button">Delete</a></td>
+		</tr>
+
+	</table>
+</body>
+</html>

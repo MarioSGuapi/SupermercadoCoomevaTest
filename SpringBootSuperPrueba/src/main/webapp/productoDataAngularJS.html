@@ -1,0 +1,234 @@
+
+<html>
+<head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.js"></script>
+
+<title>Spring Boot AngularJS example</title>
+<script type="text/javascript">
+            var app = angular.module("ProductoManagement", []);
+         
+            //Controller Part
+            app.controller("ProductoController", function($scope, $http) {
+         
+                $scope.productos = [];
+                $scope.productoForm = {
+                    idProducto : -1,
+                    codigo : "",
+                    nombre : "",
+                    valorUnidad : "",
+                    stock : ""
+                };
+         
+                //Now load the data from server
+                _refreshProductoData();
+         
+                //HTTP POST/PUT methods for add/edit producto 
+                // with the help of idProducto, we are going to find out whether it is put or post operation
+                
+                $scope.submitProducto = function() {
+         
+                    var method = "";
+                    var url = "";
+                    if ($scope.productoForm.idProducto == -1) {
+                        //Id is absent in form data, it is create new producto operation
+                        method = "POST";
+                        url = '/addProducto';
+                    } else {
+                        //Id is present in form data, it is edit producto operation
+                        method = "PUT";
+                        url = '/addProducto';
+                    }
+         
+                    $http({
+                        method : method,
+                        url : url,
+                        data : angular.toJson($scope.productoForm),
+                        headers : {
+                            'Content-Type' : 'application/json'
+                        }
+                    }).then( _success, _error );
+                };
+         
+                //HTTP DELETE- delete producto by Id
+                $scope.deleteProducto = function(producto) {
+                    $http({
+                        method : 'DELETE',
+                        url : '/deleteProducto/' + producto.idProducto
+                    }).then(_success, _error);
+                };
+ 
+             // In case of edit, populate form fields and assign form.idProducto with producto idProducto
+                $scope.editProducto = function(producto) {
+                     
+                    $scope.productoForm.codigo = producto.codigo;
+                    $scope.productoForm.nombre = producto.nombre;
+                    $scope.productoForm.valorUnidad = producto.valorUnidad;
+                    $scope.productoForm.stock = producto.stock;
+                    $scope.productoForm.idProducto = producto.idProducto;
+                };
+         
+                /* Private Methods */
+                //HTTP GET- get all productos collection
+                function _refreshProductoData() {
+                    $http({
+                        method : 'GET',
+                        url : 'http://localhost:9095/getAllProductos'
+                    }).then(function successCallback(response) {
+                        $scope.productos = response.data;
+                    }, function errorCallback(response) {
+                        console.log(response.statusText);
+                    });
+                }
+         
+                function _success(response) {
+                    _refreshProductoData();
+                    _clearFormData()
+                }
+         
+                function _error(response) {
+                    console.log(response.statusText);
+                }
+         
+                //Clear the form
+                function _clearFormData() {
+                    $scope.productoForm.idProducto = -1;                   
+                    $scope.productoForm.codigo =  "";
+                    $scope.productoForm.nombre =  "";
+                    $scope.productoForm.valorUnidad =  "";
+                    $scope.productoForm.stock =  "";
+                
+                };
+            });
+        </script>
+<style>
+.blue-button {
+	background: #25A6E1;
+	filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#25A6E1',
+		endColorstr='#188BC0', GradientType=0);
+	padding: 3px 5px;
+	color: #fff;
+	font-family: 'Helvetica Neue', sans-serif;
+	font-size: 12px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 4px;
+	border: 1px solid #1A87B9
+}
+
+.red-button {
+	background: #CD5C5C;
+	padding: 3px 5px;
+	color: #fff;
+	font-family: 'Helvetica Neue', sans-serif;
+	font-size: 12px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 4px;
+	border: 1px solid #CD5C5C
+}
+
+table {
+	font-family: "Helvetica Neue", Helvetica, sans-serif;
+	width: 50%;
+}
+
+caption {
+	text-align: left;
+	color: silver;
+	font-weight: bold;
+	text-transform: uppercase;
+	padding: 5px;
+}
+
+th {
+	background: SteelBlue;
+	color: white;
+}
+
+tbody tr:nth-child(even) {
+	background: WhiteSmoke;
+}
+
+tbody tr td:nth-child(2) {
+	text-align: center;
+}
+
+tbody tr td:nth-child(3), tbody tr td:nth-child(4) {
+	text-align: center;
+	font-family: monospace;
+}
+
+tfoot {
+	background: SeaGreen;
+	color: white;
+	text-align: right;
+}
+
+tfoot tr th:last-child {
+	font-family: monospace;
+}
+
+td, th {
+	border: 1px solid gray;
+	width: 25%;
+	text-align: left;
+	padding: 5px 10px;
+}
+</style>
+<head>
+<body ng-app="ProductoManagement" ng-controller="ProductoController">
+	<h1>Producto </h1>
+	<form ng-submit="submitProducto()">
+		<table>
+
+			<tr>
+				<th colspan="2">Add/Edit producto</th>
+			</tr>
+			<tr>
+				<td>Codigo</td>
+				<td><input type="text" ng-model="productoForm.codigo" /></td>
+			</tr>
+			<tr>
+				<td>Nombre</td>
+				<td><input type="text" ng-model="productoForm.nombre" /></td>
+			</tr>
+			<tr>
+				<td>valorUnidad</td>
+				<td><input type="text" ng-model="productoForm.valorUnidad" /></td>
+			</tr>
+			<tr>
+				<td>stock</td>
+				<td><input type="text" ng-model="productoForm.stock" /></td>
+			</tr>
+			<tr>
+				<td colspan="2"><input type="submit" value="Submit"
+					class="blue-button" /></td>
+			</tr>
+		</table>
+	</form>
+	<table>
+		<tr>
+
+			<th>Codigo</th>
+			<th>Nombre</th>
+			<th>Valor Unidad</th>
+			<th>Stock</th>
+			<th>Operations</th>
+
+		</tr>
+
+		<tr ng-repeat="producto in productos">
+
+			<td>{{ producto.codigo }}</td>
+			<td>{{ producto.nombre }}</td>
+			<td>{{ producto.valorUnidad }}</td>
+			<td>{{ producto.stock }}</td>
+
+			<td><a ng-click="editProducto(producto)" class="blue-button">Edit</a>
+				| <a ng-click="deleteProducto(producto)" class="red-button">Delete</a></td>
+		</tr>
+
+	</table>
+</body>
+</html>
